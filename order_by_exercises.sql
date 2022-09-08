@@ -3,8 +3,8 @@ USE employees;
 
 SELECT *
 FROM employees
-WHERE last_name LIKE 'E%E' 
-	ORDER BY hire_date;
+WHERE hire_date LIKE '199%' AND birth_date LIKE '%-12-25'
+	ORDER BY birth_date,hire_date DESC;
 
 /* 1 Create a new file named order_by_exercises.sql and copy in the contents of your exercise 
 from the previous lesson.
@@ -70,3 +70,11 @@ WHERE last_name LIKE 'E%E'
 employee who was hired last is the first result. Enter a comment with the number of employees returned,
  the name of the oldest employee who was hired last, and the name of the youngest employee who was 
  hired first.
+	362 employees where returned.
+    The oldest employee hired last is Khun Bernini.
+    The youngest employee hired first is Douadi Pettis.
+    
+SELECT *
+FROM employees
+WHERE hire_date LIKE '199%' AND birth_date LIKE '%-12-25'
+	ORDER BY birth_date,hire_date DESC;
