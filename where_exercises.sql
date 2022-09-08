@@ -59,16 +59,16 @@ FROM employees
 WHERE hire_date LIKE '199%';
 /* 9 Find all current or previous employees born on Christmas. Enter a comment with the number 
 of employees returned.
-	789 employees where born on Christmas.	*/
+	842 employees where born on Christmas.	*/
 SELECT *
 FROM employees
-WHERE hire_date LIKE '%12-25';
+WHERE birth_date LIKE '%12-25';
 /* 10 Find all current or previous employees hired in the 90s and born on Christmas. Enter a 
 comment with the number of employees returned.
-	346 employees where born on Christmas and hired in the 90s */
+	362 employees where born on Christmas and hired in the 90s */
 SELECT *
 FROM employees
-WHERE hire_date LIKE '%12-25' AND hire_date LIKE '199%';
+WHERE birth_date LIKE '%12-25' AND hire_date LIKE '199%';
 /* 11 Find all current or previous employees with a 'q' in their last name. Enter a comment with 
 the number of records returned.
 	1873 employees contain the letter q in thier last name */
@@ -77,7 +77,7 @@ FROM employees
 WHERE last_name like '%q%';
 /* 12 Find all current or previous employees with a 'q' in their last name but not 'qu'. How 
 many employees are found?
-	507 employees have a last name with a 'q' but not contain 'qu'	*/
+	547 employees have a last name with a 'q' but not contain 'qu'	*/
 SELECT *
 FROM employees
 WHERE last_name like '%q%' AND last_name NOT LIKE '%qu%'
