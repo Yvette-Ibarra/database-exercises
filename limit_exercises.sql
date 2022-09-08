@@ -32,13 +32,13 @@ WHERE hire_date LIKE '199%'
 	 five after that would be your second page, etc. Update the query to find the tenth page of results.
 	 LIMIT and OFFSET can be used to create multiple pages of data. What is the relationship between OFFSET
      (number of results to skip), LIMIT (number of results per page), and the page number?
-		LIMIT commands how many rows will be populated in our table OFFSET commands where in the list the LIMIT will start. 
-		LIMIT times PAGE NUMBER equals OFFSET. 		*/
+			
+        (Page -1)*Limit = offset*/
 
 SELECT  *
 FROM employees
 WHERE hire_date LIKE '199%' 
 	AND birth_date LIKE '%12-25'
 	ORDER BY hire_date
-	LIMIT 5 OFFSET 50;
+	LIMIT 5 OFFSET 45;
 
