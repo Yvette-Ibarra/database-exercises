@@ -88,6 +88,7 @@ FROM employees
 GROUP BY username
 HAVING u_names>1;
 
+*/
 
 
 
@@ -95,17 +96,52 @@ HAVING u_names>1;
 Determine the historic average salary for each employee. When you hear, read, or think "for each" 
 with regard to SQL, you'll probably be grouping by that exact column.
 
-Using the dept_emp table, count how many current employees work in each department. The query result
+SELECT emp_no, AVG(salary)
+FROM salaries
+group by emp_no;
+
+
+* Using the dept_emp table, count how many current employees work in each department. The query result
  should show 9 rows, one for each department and the employee count.
  
-Determine how many different salaries each employee has had. This includes both historic and current.
+SELECT dept_no, count(emp_no)
+FROM dept_emp
+GROUP BY dept_no;
+ 
+* Determine how many different salaries each employee has had. This includes both historic and current.
 
-Find the maximum salary for each employee.
+SELECT emp_no, COUNT(salary)
+FROM salaries
+group by emp_no;
 
-Find the minimum salary for each employee.
+* Find the maximum salary for each employee.
 
-Find the standard deviation of salaries for each employee.
+SELECT emp_no, MAX(salary)
+FROM salaries
+group by emp_no;
 
-Now find the max salary for each employee where that max salary is greater than $150,000.
+* Find the minimum salary for each employee.
 
-Find the average salary for each employee where that average salary is between $80k and $90k.
+SELECT emp_no, MIN(salary)
+FROM salaries
+group by emp_no;
+
+* Find the standard deviation of salaries for each employee.
+
+SELECT emp_no, STDDEV(salary)
+FROM salaries
+group by emp_no;
+
+* Now find the max salary for each employee where that max salary is greater than $150,000.
+
+SELECT emp_no, MAX(salary) AS max_s
+FROM salaries
+group by emp_no
+HAVING max_s > 150000;
+
+* Find the average salary for each employee where that average salary is between $80k and $90k.
+
+SELECT emp_no, AVG(salary) AS avg_s
+FROM salaries
+group by emp_no
+HAVING avg_s BETWEEN 80000 AND 90000;
