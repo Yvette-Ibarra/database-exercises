@@ -154,24 +154,16 @@ LIMIT 1;
 /* 10 Determine the average salary for each department. Use all salary information and round your results. 	*/
 
 
-SELECT  AVG(s.salary), de.dept_no
-FROM dept_emp AS de
+SELECT  d.dept_name, ROUND(AVG (s.salary),0) AS average_salary
+FROM departments AS d
+LEFT JOIN dept_emp AS de
+	ON d.dept_no = de.dept_no
 LEFT JOIN salaries AS s
-	ON s.emp_no = de.emp_no
-WHERE de.to_date LIKE '99%' 
-GROUP BY de.dept_no,s.salary;
+	ON de.emp_no = s.emp_no
+GROUP BY d.dept_name
+ORDER BY average_salary DESC;
 
 
-
-SELECT*
-FROM dept_emp;
-
-SELECT *
-FROM departments;
-SELECT * 
-FROM employees;
-SELECT * 
-FROM salaries;
 
 
 
