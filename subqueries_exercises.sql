@@ -87,14 +87,36 @@ WHERE gender = 'F'; */
 /* 5 Find all the employees who currently have a higher salary than the companies overall, 
 historical average salary. */
 
-SELECT *
+#154543 employees curently have a higher salary that the historical average salary
+
+#ANSWER without JOIN TABLE
+SELECT count(*)
+FROM employees
+WHERE emp_no IN (
+					SELECT emp_no
+					FROM salaries
+					WHERE to_date>CURDATE()
+						AND salary >(
+										SELECT AVG(salary)
+										FROM salaries
+									)
+				);
+#ANSWER with JOIN TABLE
+SELECT count(*)
 FROM employees
 JOIN salaries
 	ON employees.emp_no = salaries.emp_no
     AND salaries.to_date > CURDATE()
-WHERE salaries.salary >(SELECT AVG(salary)
-FROM salaries);
+WHERE salary > (
+										SELECT AVG(salary)
+										FROM salaries
+									
+				);
 
+
+SELECT *
+FROM salaries
+WHERE salaries.to_date>CURDATE();
 
 /* Subquery
 SELECT AVG(salary)
@@ -188,6 +210,54 @@ WHERE gender = 'F'; */
 
 /* 2 Find the first and last name of the employee with the highest salary. */
 
+SELECT *
+FROM employees;
+
+SELECT *
+FROM salaries
+WHERE to_date > CURDATE()
+ORDER BY salary DESC;
+
+SELECT *
+FROM employees e
+JOIN salaries s ON e.emp_no = s.emp_no
+WHERE to_date > CURDATE()
+	AND salary =  (
+					SELECT MAX(salary)
+					FROM salaries
+					WHERE to_date > CURDATE()
+				)
+	;
+
+/* 3 Find the department name that the employee with the highest salary works in. */
+
+SELECT *
+FROM departments
+WHERE dept_no = (
+					SELECT de.dept_no
+					FROM dept_emp  de
+					JOIN salaries s
+					ON de.emp_no = s.emp_no
+					AND s.to_date > CURDATE()
+					AND salary IN (
+									SELECT MAX(salary)
+									FROM salaries
+									WHERE to_date > CURDATE()
+                                    )
+					);
 
 
-/* 3 Find the department name that the employee with the highest salary works in.
+
+    
+/* subquery
+    
+SELECT de.dept_no
+FROM dept_emp  de
+JOIN salaries s
+	ON de.emp_no = s.emp_no
+    AND s.to_date > CURDATE()
+    AND salary IN (SELECT MAX(salary)
+					FROM salaries
+                    WHERE to_date > CURDATE());
+                    
+
