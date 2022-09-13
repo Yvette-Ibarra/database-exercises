@@ -29,9 +29,11 @@ RIGHT JOIN roles ON users.role_id = roles.id;
 used with join queries. Use count and the appropriate join type to get a list of roles along 
 with the number of users that has the role. Hint: You will also need to use group by in the query.*/
 
-SELECT roles.name, COUNT(*) AS number_or_users
+ #correction should be right join and count(users.name)
+ 
+SELECT roles.name, COUNT(users.name) AS number_or_users
 FROM users
-JOIN roles ON users.role_id = roles.id
+RIGHT JOIN roles ON users.role_id = roles.id
 GROUP BY roles.name;
 
 -- Employees Database --
@@ -51,6 +53,15 @@ LEFT JOIN employees AS e
 WHERE to_date like '999%'
 ORDER BY Department_name;
 
+# different Answer
+SELECT d.dept_name AS 'Department Name',
+	CONCAT(e.first_name, ' ', e.last_name) AS 'Department MAnager'
+FROM employees AS e
+JOIN dept_manager AS dm 
+	ON e.emp_no = dm.emp_no
+    AND dm.to_date > CURDATE() 	# use AND instead of WHERE
+JOIN departments AS d 
+	USING(dept_no); # using will match only if the column name match, shortcut
 
 /* 3 Find the name of all departments currently managed by women.	*/
 
@@ -64,6 +75,17 @@ LEFT JOIN employees AS e
 WHERE to_date like '999%' AND e.gender ='F'
 ORDER BY Department_name;
 
+#different way with shortcuts
+SELECT d.dept_name AS 'Department Name',
+	CONCAT(e.first_name, ' ', e.last_name) AS 'Department MAnager'
+FROM employees AS e
+JOIN dept_manager AS dm 
+	ON e.emp_no = dm.emp_no
+    AND dm.to_date > CURDATE()
+    AND e.gender = 'F'	#can use AND under JOIN to be used as a WHERE
+JOIN departments AS d 
+	USING(dept_no);
+
 /* 4 Find the current titles of employees currently working in the Customer Service department.	*/
 
 SELECT t.title,count(t.title)
@@ -75,6 +97,19 @@ WHERE de.dept_no = 'd009'
     AND  t.to_date LIKE '999%'
 GROUP BY t.title
 ORDER by t.title;
+
+# different answer with shorcuts
+SELECT t.title,
+	COUNT(de.emp_no) AS 'Count'
+FROM dept_emp de
+JOIN titles t ON de.emp_no = t.emp_no
+	AND t.to_date > CURDATE()
+    AND de.to_date > CURDATE()
+JOIN departments d ON de.dept_no = d.dept_no
+	AND d.dept_name = 'Customer SERVICE'
+GROUP BY t.title;
+
+
 
 
 /* 5 Find the current salary of all current managers.	 */
@@ -92,6 +127,19 @@ LEFT JOIN salaries AS s
 WHERE dm.to_date like '999%'AND s.to_date LIKE '99%'
 ORDER BY Department_name;
 
+# different answer
+SELECT d.dept_name AS 'Department Name', 
+	CONCAT(e.first_name, ' ', e.last_name) AS 'Name',
+    s.salary AS 'Salary'
+FROM employees e
+JOIN salaries s ON e.emp_no = s.emp_no
+	AND s.to_date > CURDATE()
+JOIN dept_manager dm ON e.emp_no =dm.emp_no	
+	AND dm.to_date > CURDATE()
+JOIN departments d ON dm.dept_no = d.dept_no
+ORDER BY d.dept_name;
+
+
 /* 6 Find the number of current employees in each department.	*/
 
 SELECT de.dept_no, d.dept_name, COUNT(de.emp_no) AS num_employees
@@ -103,6 +151,16 @@ LEFT JOIN departments AS d
 WHERE to_date LIKE '999%'
 GROUP BY de.dept_no
 ORDER BY dept_no;
+
+# Different Answer
+SELECT d.dept_no,
+		d.dept_name,
+        COUNT(emp_no) AS num_employees
+FROM dept_emp de
+JOIN departments d ON de.dept_no =d.dept_no
+	AND de.to_date > CURDATE()
+GROUP BY d.dept_no, d.dept_name
+ORDER BY d.dept_no;
 
 /* 7 Which department has the highest average salary? Hint: Use current not historic information.	*/
 
@@ -117,6 +175,21 @@ WHERE s.to_date LIKE '999%'
 GROUP BY  d.dept_name
 ORDER BY average_salary desc
 LIMIT  1;
+
+# Differen Answer
+ 
+ SELECT d.dept_name,
+	ROUND(AVG(s.salary), 2) AS average_salary
+ FROM dept_emp de
+ JOIN salaries s ON de.emp_no = s.emp_no
+	AND de.to_date > CURDATE()		# need current employees
+	AND s.to_date > CURDATE() 		#need current salary
+JOIN departments d 
+	ON de.dept_no = d.dept_no
+GROUP BY d.dept_name
+ORDER BY average_salary DESC
+LIMIT 1;
+    
 
 /* 8 Who is the highest paid employee in the Marketing department? 	*/
 
@@ -135,6 +208,20 @@ GROUP BY de.dept_no,s.salary, e.emp_no
 ORDER BY s.salary desc
 LIMIT 1;
 	
+# different answer
+
+SELECT e.first_name, e.last_name
+FROM employees e
+JOIN dept_emp de ON e.emp_no = de.emp_no	# JOIN not Left JOIN because we are not consern with employees who dont have an assign dept and viseversa.
+	AND de.to_date > CURDATE()
+JOIN salaries s ON e.emp_no = s.emp_no
+	AND s.to_date > CURDATE()
+JOIN departments d ON de.dept_no = d.dept_no
+	AND d.dept_name = 'Marketing'
+ORDER BY s.salary DESC
+LIMIT 1;
+
+
 
 /* 9 Which current department manager has the highest salary? 	*/
 
@@ -151,6 +238,27 @@ WHERE dm.to_date like '999%' AND s.to_date LIKE '99%'
 ORDER BY salary desc
 LIMIT 1;
 
+# Different answer
+
+SELECT e.first_name,
+	e.last_name, 
+	CONCAT ('$',FORMAT((s.salary),2)),
+	d.dept_name
+FROM employees e
+JOIN dept_manager dm
+	ON e.emp_no = dm.emp_no
+    AND dm.to_date > CURDATE()
+JOIN salaries s
+	ON e.emp_no = s.emp_no
+    AND s.to_date >CURDATE()
+JOIN departments d
+	ON dm.dept_no =d.dept_no
+ORDER BY s.salary DESC
+LIMIT 1
+    ;
+
+
+
 /* 10 Determine the average salary for each department. Use all salary information and round your results. 	*/
 
 
@@ -163,8 +271,40 @@ LEFT JOIN salaries AS s
 GROUP BY d.dept_name
 ORDER BY average_salary DESC;
 
+# DIfferent answer
+
+SELECT d.dept_name,
+	ROUND(AVG(s.salary),0) AS average_salary
+From departments d
+JOIN dept_emp de ON d.dept_no =de.dept_no
+JOIN salaries s ON s.emp_no =de.emp_no
+GROUP BY d.dept_name
+ORDER BY average_salary DESC;
 
 
+
+/* 11 Bonus Find the names of all current employees, their department name, and their current manager's name.
+
+240,124 Rows
+
+Employee Name | Department Name  |  Manager Name
+--------------|------------------|-----------------
+ Huan Lortz   | Customer Service | Yuchang Weedman*/
+
+USE employees;
+SELECT CONCAT(e.first_name,' ', e.last_name) AS Employee_Name,
+	d.dept_name,
+	CONCAT(e2.first_name, e2.last_name) AS Manager
+FROM departments AS d
+LEFT JOIN dept_emp AS de
+	ON d.dept_no = de.dept_no
+LEFT JOIN employees AS e
+	ON de.emp_no = e.emp_no
+LEFT JOIN dept_manager AS dm
+	ON dm.dept_no = d.dept_no
+LEFT JOIN employees As e2
+	ON e2.emp_no = dm.emp_no
+WHERE dm.to_date LIKE '999%'AND de.to_date LIKE '999%';
 
 
 
