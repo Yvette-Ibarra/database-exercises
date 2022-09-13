@@ -16,8 +16,17 @@ WHERE e1.hire_date =(
 						FROM employees e
 						WHERE e.emp_no = 101010
 					);
-
-
+# class answer 55 returns
+SELECT *
+FROM employees
+JOIN dept_emp USING(emp_no)
+WHERE to_date >CURDATE()
+AND hire_date  = (							#could be IN but returns list  = returns an boolean
+					SELECT hire_date
+                    FROM employees
+                    WHERE emp_no =101010
+				  ) ;
+                  
 /* 2 Find all the titles ever held by all current employees with the first name Aamod. */
  
 
@@ -31,8 +40,19 @@ WHERE t.emp_no IN (
 					FROM employees
 					WHERE first_name = 'Aamod'
 				)
-		AND t.to_date > CURDATE()
+		 AND t.to_date > CURDATE()
 GROUP BY title;		
+
+#class answer
+SELECT DISTINCT title
+FROM titles
+WHERE emp_no IN (
+					SELECT emp_no
+                    FROM employees
+                    JOIN dept_emp USING(emp_no)
+                    WHERE first_name ='aamod'
+                    AND to_date > CURDATE()
+				);
 
 /* Subquery
 SELECT emp_no
@@ -47,10 +67,21 @@ Give the answer in a comment in your code. */
 
 SELECT count(emp_no)
 FROM employees
-WHERE emp_no IN (SELECT emp_no
-FROM dept_emp
-GROUP BY emp_no
-HAVING MAX(to_date) < CURDATE());
+WHERE emp_no IN (
+					SELECT emp_no
+					FROM dept_emp
+					GROUP BY emp_no
+					HAVING MAX(to_date) < CURDATE()
+				);
+                
+#class answer
+SELECT COUNT(*)
+FROM employees
+WHERE emp_no NOT IN (
+						SELECT emp_no
+                        FROM dept_emp
+                        WHERE to_date > CURDATE()
+					)  ; 
 
 /* SUBQUERY
 SELECT emp_no
@@ -73,9 +104,21 @@ SELECT e.first_name, e.last_name
 FROM dept_manager dm
 JOIN employees e
 	ON dm.emp_no = e.emp_no
-WHERE e.emp_no IN( SELECT emp_no
+WHERE e.emp_no IN( 
+					SELECT emp_no
+					FROM employees
+					WHERE gender = 'F') 
+	AND to_date > CURDATE();
+
+#class answer
+SELECT *
 FROM employees
-WHERE gender = 'F') AND to_date > CURDATE();
+WHERE emp_no IN (
+					SELECT emp_no
+					FROM dept_manager
+                    WHERE to_date > CURDATE()
+				)
+AND gender = 'f';
 
 /* Subquery
 SELECT emp_no, gender
@@ -117,6 +160,16 @@ WHERE salary > (
 SELECT *
 FROM salaries
 WHERE salaries.to_date>CURDATE();
+
+# class answer
+SELECT *
+FROM salaries
+JOIN employees USING(emp_no)
+WHERE to_date > CURDATE()
+AND salary > (
+				SELECT AVG(salary)
+                FROM salaries
+			 );
 
 /* Subquery
 SELECT AVG(salary)
@@ -178,6 +231,34 @@ FROM salaries
 WHERE to_date >CURDATE()) * 100 AS s
 FROM salaries
 GROUP BY s;
+
+#class answer
+
+SELECT MAX(salary)
+FROM salaries
+WHERE to_date > CURDATE();
+
+SELECT STD(salary)
+FROM salaries
+WHERE to_date > CURDATE();
+
+SELECT COUNT(*)
+FROM salaries
+WHERE to_date > CURDATE()
+AND salary >= ( 
+				(
+					SELECT MAX(salary)
+					FROM salaries
+					WHERE to_date > CURDATE() 
+				)
+                - 	(
+						SELECT STD(salary)
+						FROM salaries
+						WHERE to_date > CURDATE()
+					)
+                )  ;  
+
+
 
 /* SUBQUERIES
 
