@@ -16,6 +16,17 @@ USE mirzakhani_1931;
  SELECT *
  FROM employees_with_departments;
  
+	#Instructor answer
+CREATE TEMPORARY TABLE employees_with_departments AS(
+SELECT first_name, last_name, dept_name
+FROM employees.employees
+JOIN employees.dept_emp USING (emp_no)
+JOIN employees.departments USING (dept_no)
+WHERE to_date >CURTIME() );
+
+SELECT *
+FROM employees_with_departments;
+
  
 /* a Add a column named full_name to this table. It should be a VARCHAR whose length is the sum of 
 the lengths of the first name and last name columns */
@@ -48,6 +59,13 @@ DROP COLUMN last_name;
  JOIN employees.dept_emp de ON de.emp_no =e.emp_no
  JOIN employees.departments d ON d.dept_no = de.dept_no);
 
+#Instructor answer
+ CREATE TEMPORARY TABLE employees_with_departments AS (
+ SELECT  CONCAT(first_name, last_name), dept_name
+ FROM employees.employees 
+ JOIN employees.dept_emp USING(emp_no)
+ JOIN employees.departments USING(dept_no));
+
 /* 2 Create a temporary table based on the payment table from the sakila database.
 Write the SQL necessary to transform the amount column such that it is stored as an integer
  representing the number of cents of the payment. For example, 1.99 should become 199. */
@@ -65,6 +83,23 @@ UPDATE payment_table
 SET p_amount = pennies_amount;
 
 ALTER TABLE payment_table DROP COLUMN pennies_amount;
+
+#Instructor Answer
+
+SELECT *
+FROM sakila.payment;
+
+CREATE TEMPORARY TABLE paymnet AS (
+SELECT payment_id, 
+	customer_id, 
+    staff_id, 
+    rental_id, amount * 100 AS amount_in_pennies,
+    payment_date, 
+    last_update
+FROM sakila.payment);
+
+ALTER TABLE paymnet MODIFY amount_in_pennies INT NOT NULL;
+
 
 /* 3 Find out how the current average pay in each department compares to the overall current pay 
 for everyone at the company. In order to make the comparison easier, you should use the Z-score 
@@ -94,6 +129,48 @@ SET overall_avg =(
                     WHERE s.to_date > CURDATE()
 );
 
+# Instructor Answer
+
+SELECT AVG(salary), STD(salary)
+FROM employees.salaries
+WHERE to_date > CURDATE();
+
+CREATE TEMPORARY TABLE overall_aggragates AS (
+SELECT AVG(salary) AS avg_salary, STD(salary) AS std_salary
+FROM employees.salaries
+WHERE to_date > CURDATE()
+);
+
+SELECT dept_name, AVG(salary) AS department_current_average
+FROM employees.salaries 
+JOIN employees.dept_emp  USING(emp_no)
+JOIN employees.departments USING(dept_no)
+WHERE employees.dept_emp.to_date > CURDATE()
+	AND employees.salaries.to_date > CURDATE()
+GRoup BY dept_name;
+
+CREATE TEMPORARY TABLE current_info (
+SELECT dept_name, AVG(salary) AS department_current_average
+FROM employees.salaries 
+JOIN employees.dept_emp  USING(emp_no)
+JOIN employees.departments USING(dept_no)
+WHERE employees.dept_emp.to_date > CURDATE()
+	AND employees.salaries.to_date > CURDATE()
+GRoup BY dept_name);
+
+ALTER TABLE current_info ADD o_avg FLOAT(10,2);
+ALTER TABLE current_info ADD o_std FLOAT(10,2);
+ALTER TABLE current_info ADD Zscore FLOAT(10,2);
+
+SELECT *
+FROM current_info;
+
+UPDATE current_info SET o_avg = (
+									SELECT avg_salary
+									FROM overall_aggragates);
+UPDATE current_info SET o_std = (SELECT std_salary FROM overall_aggragates);
+UPDATE current_info SET zscore =
+(department_current_average - o_avg) / o_std;
 
 
 
