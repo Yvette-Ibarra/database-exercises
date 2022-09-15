@@ -47,13 +47,35 @@ group by Born_decade;
  R&D(research and development), Sales & Marketing, Prod & QM, Finance & HR, Customer Service?		*/
  
  
+ SELECT  AVG(s.salary),
+	CASE
+		WHEN dept_name IN ('research','development') THEN 'R&D'
+        WHEN dept_name IN ('sales','marketing')THEN 'Sales & Marketing'
+        WHEN dept_name IN ('production','quality management') THEN 'Prod &QM'
+        WHEN dept_name IN ('Human Resources','Finance') THEN 'Finance & HR'
+        WHEN dept_name IN ('Customer Service') THEN 'Customer Service'
+        END AS salary_compare
+FROM departments d
+JOIN dept_emp de ON de.dept_no = d.dept_no
+	AND de.to_date > CURDATE()
+JOIN salaries s ON s.emp_no = de.emp_no
+	AND s.to_date >CURDATE()
+GROUP BY salary_compare;
+ 
+
+
+
+
+/* first draft
+
+ 
 SELECT *
 FROM departments;
 
 SELECT *
 FROM dept_emp;
 
-SELECT d.dept_no,AVG(salary)
+SELECT d.dept_no,AVG(salary), d.dept_name
 FROM salaries s
 JOIN dept_emp de ON de.emp_no = s.emp_no
 	AND s.to_date > CURDATE()
@@ -61,13 +83,8 @@ JOIN dept_emp de ON de.emp_no = s.emp_no
 JOIN departments d ON d.dept_no = de.dept_no
 GROUP BY d.dept_no;
 
-SELECT avg_by_dept.AVG(salary),
-		CASE
-			WHEN dept_no IN (d007 ,d001) THEN SUM(AVG(salary))/2
-		END AS i
-	
-    
-    
+SELECT avg_by_dept.AVG(salary)
+		
 FROM
 (SELECT d.dept_no,AVG(salary)
 FROM salaries s
@@ -75,7 +92,6 @@ JOIN dept_emp de ON de.emp_no = s.emp_no
 	AND s.to_date > CURDATE()
     AND de.to_date > CURDATE()
 JOIN departments d ON d.dept_no = de.dept_no
-GROUP BY d.dept_no) 
-AS avg_by_dept;
+GROUP BY d.dept_no);
 
 
